@@ -1,0 +1,11 @@
+
+{% extends 'addressbookapp/base.html' %}
+{% block content %}
+<h1>Delete Address Book</h1>
+<p>Are you sure you want to delete "{{ address.name }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+</form>
+<a href="{% url 'addressbook_list' %}" class="btn">Cancel</a>
+{% endblock %}

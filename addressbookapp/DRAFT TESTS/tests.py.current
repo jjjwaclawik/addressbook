@@ -1,0 +1,116 @@
+from django.test import TestCase
+from django.urls import reverse
+from .models import AddressBook
+from .forms import AddressForm
+
+
+
+# Create your tests here.
+
+# bookapp/tests.py
+
+
+class BookTests(TestCase):
+
+    def setUp(self):
+        self.book = Book.objects.create(
+            title='Test Book',
+            author='Test Author',
+            genre='Test Genre',
+            url='https://djangoproject.com',
+        )
+        
+    def test_book_list_view(self):
+        response = self.client.get(reverse('book_list'))
+        self.assertEqual(response.status_code, 200)  #200 = successful page load
+        self.assertContains(response, 'Test Book')
+        self.assertTemplateUsed(response, 'bookapp/book_list.html')
+        self.assertContains(response, 'https://djangoproject.com')
+
+    
+
+    def test_book_create_view(self):
+        book_count = Book.objects.count()
+        response = self.client.post(reverse('book_create'), {
+            'title': 'New AddressBook',
+            'author': 'New Author',
+            'genre': 'New Genre',
+            'url': 'https://newbook.com'
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect after creation
+        self.assertEqual(Book.objects.count(), book_count + 1)
+        new_book = AddressBook.objects.last()
+        self.assertEqual(new_book.title, 'New Book')
+        self.assertEqual(new_book.url, 'https://newbook.com')
+
+
+    def test_book_update_view(self):
+        response = self.client.post(reverse('book_update', args=[self.book.id]), {
+            'title': 'Updated Book',
+            'author': 'Updated Author',
+            'genre': 'Updated Genre',
+            'url' : 'https://badURL-UPDATE.com',
+        })
+        self.assertEqual(response.status_code, 302)  # Redirect after update
+        self.book.refresh_from_db()
+        self.assertEqual(self.book.title, 'Updated Book')
+        self.assertEqual(self.book.url, 'https://badURL-UPDATE.com')
+
+    def test_book_delete_view(self):
+        book_count = Book.objects.count()
+        response = self.client.post(reverse('book_delete', args=[self.book.id]))
+        self.assertEqual(response.status_code, 302)  # Redirect after deletion
+        self.assertEqual(Book.objects.count(), book_count - 1)
+        self.assertFalse(Book.objects.filter(id=self.book.id).exists())
+
+
+class BookModelTests(TestCase):
+
+    def test_book_creation(self):
+        book = Book.objects.create(
+            title='Test Book',
+            author='Test Author',
+            genre='Test Genre',
+            url='https://djangoproject.com',
+        )
+        self.assertEqual(self.book.title, 'Test Book')
+        self.assertEqual(self.book.author, 'Test Author')
+        self.assertEqual(self.book.genre, 'Test Genre')
+        self.assertEqual(self.book.url, 'https://djangoproject.com')
+
+
+class BookModelTests(TestCase):
+
+    def test_book_creation(self):
+        book = Book.objects.create(
+            title='Test Book',
+            author='Test Author',
+            genre='Test Genre',
+            url='https://testbook.com'
+        )
+        self.assertEqual(book.title, 'Test Book')
+        self.assertEqual(book.author, 'Test Author')
+        self.assertEqual(book.genre, 'Test Genre')
+        self.assertEqual(book.url, 'https://testbook.com')
+
+class BookFormTests(TestCase):
+
+    def test_valid_form(self):
+        data = {
+            'title': 'Test Book',
+            'author': 'Test Author',
+            'genre': 'Test Genre',
+            'url': 'https://testbook.com'
+        }
+        form = BookForm(data=data)
+        self.assertTrue(form.is_valid())
+
+    def test_invalid_form(self):
+        data = {
+            'title': '',
+            'author': 'Test Author',
+            'genre': 'Test Genre',
+            'url': 'invalid-url',
+        }
+        form = AddressForm(data=data)
+        self.assertFalse(form.is_valid())

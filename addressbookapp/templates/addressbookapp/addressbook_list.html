@@ -1,0 +1,35 @@
+{% extends 'AddressBookapp/base.html' %}
+
+{% block content %}
+<h1>Address Book</h1>
+<a href="{% url 'addressbook_create' %}" class="btn">Add New Address</a>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Street Address 1</th>
+            <th>Address 2</th>
+            <th>City</th>
+            <th>State</th>
+            <th>Zip Code</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for address in addressbook %}
+        <tr>
+            <td>{{ address.name }}</td>
+            <td>{{ address.address1 }}</td>
+            <td>{{ address.address2 }}</td>
+            <td>{{ address.city }}</td>
+            <td>{{ address.state }}</td>
+            <td>{{ address.zipcode }}</td>
+            <td>
+                <a href="{% url 'addressbook_update' address.pk %}" class="btn">Edit</a>
+                <a href="{% url 'addressbook_delete' address.pk %}" class="btn btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
